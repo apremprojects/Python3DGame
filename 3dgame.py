@@ -2,7 +2,7 @@ from direct.showbase.ShowBase import ShowBase
 from direct.showbase import DirectObject
 import os
 from direct.task import Task
-from panda3d.core import CollisionSphere, CollisionNode, CollisionHandlerPusher
+from panda3d.core import CollisionRay, CollisionNode, CollideMask
 from pandac.PandaModules import WindowProperties
 class MyApp(ShowBase):
     def __init__(self):
@@ -35,7 +35,7 @@ class MyApp(ShowBase):
         self.player.reparentTo(self.render)
         self.player.setScale(0.25, 0.25, 0.25)
         self.player.setPos(-8, 42, 0)
-        self.scene = self.loader.loadModel("models/teapot")
+        self.scene = self.loader.loadModel("models/environment")
         # reparent it to render so it actually gets rendered
         self.scene.reparentTo(self.render)
         self.scene.setScale(0.25, 0.25, 0.25)
@@ -61,7 +61,24 @@ class MyApp(ShowBase):
     def eyes(self,Yaw,Pitch,Roll,task):
         playerpos=self.player.getPos()
         self.cam.setPos(playerpos.getX(),playerpos.getY()-60,playerpos.getZ()+15)
+        mw = self.mouseWatcherNode
+        campos=base.cam.getPos()
+        if mw.hasMouse():
+            x = mw.getMouseX()
+            y = mw.getMouseY()
+            props = self.win.getProperties()
+            self.win.movePointer(0, props.getXSize() // 2, props.getYSize() // 2)
+            if(x>0):
+                Yaw=Yaw+1
+            elif(x==0):
+                Yaw=Yaw
+            else:
+                Yaw=Yaw-1
+        print(Yaw, Pitch, Roll)
         self.cam.setHpr(Yaw, Pitch, Roll)
+        self.player.setH(self.player,Yaw)
+        self.player.setP(self.player, Pitch)
+        self.player.setR(self.player, Roll)
         return task.cont
     def updateKeyMap(self, controlName, controlState):
         self.keyMap[controlName] = controlState
